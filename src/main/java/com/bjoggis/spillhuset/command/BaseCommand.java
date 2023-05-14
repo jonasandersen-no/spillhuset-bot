@@ -1,6 +1,6 @@
 package com.bjoggis.spillhuset.command;
 
-import com.bjoggis.spillhuset.Option;
+import com.bjoggis.spillhuset.model.Option;
 import jakarta.validation.constraints.NotNull;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.internal.interactions.CommandDataImpl;

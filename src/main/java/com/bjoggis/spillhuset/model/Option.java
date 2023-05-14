@@ -1,4 +1,4 @@
-package com.bjoggis.spillhuset;
+package com.bjoggis.spillhuset.model;
 
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 
