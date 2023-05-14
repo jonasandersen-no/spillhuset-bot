@@ -75,7 +75,7 @@ jobs:
 
       - name: Update docker-compose file
         run: |
-          sed -i "s/image: ghcr.io\/notbjoggisatall\/valorant-bot:.*$/image: ghcr.io\/notbjoggisatall\/valorant-bot:${VERSION:1}/" docker-compose.yml
+          sed -i "s/image: ghcr.io\/notbjoggisatall\/spillhuset-bot:.*$/image: ghcr.io\/notbjoggisatall\/spillhuset-bot:${VERSION:1}/" docker-compose.yml
         shell: bash
         env:
           VERSION: ${{ github.event.release.tag_name }}
