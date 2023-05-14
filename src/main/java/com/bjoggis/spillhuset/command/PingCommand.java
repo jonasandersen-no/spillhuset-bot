@@ -1,6 +1,6 @@
 package com.bjoggis.spillhuset.command;
 
-import com.bjoggis.spillhuset.Option;
+import com.bjoggis.spillhuset.model.Option;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
