@@ -7,10 +7,14 @@ import org.springframework.validation.annotation.Validated;
 
 @ConfigurationProperties(prefix = "spillhuset")
 @Validated
-public record SpillhusetProperties(Discord discord) {
+public record SpillhusetProperties(Discord discord, Openai openai) {
 
 
   public record Discord(@NotNull String token, @NotNull Activity activity) {
+
+  }
+
+  public record Openai(@NotNull String token) {
 
   }
 }

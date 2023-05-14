@@ -13,5 +13,4 @@ public class SpillhusetBotApplication {
   public static void main(String[] args) {
     SpringApplication.run(SpillhusetBotApplication.class, args);
   }
-
 }
