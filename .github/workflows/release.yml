@@ -44,6 +44,7 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
           DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
   update:
+    needs: build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -89,6 +90,7 @@ jobs:
           title: "Update version to ${{ env.NEXT_VERSION }}"
           body: "Update version to ${{ env.NEXT_VERSION }}"
   deploy:
+    needs: update
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
