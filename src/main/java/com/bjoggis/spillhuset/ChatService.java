@@ -48,8 +48,7 @@ public class ChatService {
         threadId);
 
     List<ChatMessage> chatMessages = new ArrayList<>();
-    chatMessages.add(new ChatMessage("system", "You are a human. You are one of the friends in our group."));
-    chatMessages.add(new ChatMessage("system", "Try to reply what the users says. Do not say that you are a bot or an ai. Never say that you are an assistant."));
+    chatMessages.add(new ChatMessage("system", "You are an helpful assistant that tries to answer like a human"));
 
     List<ChatMessage> oldMessages = new java.util.ArrayList<>(messages.stream().map(message2 -> {
       switch (message2.getSender()) {
