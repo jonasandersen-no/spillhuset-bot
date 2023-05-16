@@ -4,6 +4,7 @@ import com.bjoggis.spillhuset.command.BaseCommand;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import net.dv8tion.jda.api.entities.SelfUser;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.session.ReadyEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -44,6 +45,9 @@ public class SlashCommandListener extends ListenerAdapter {
 
   @Override
   public void onReady(ReadyEvent event) {
+    SelfUser selfUser = event.getJDA().getSelfUser();
+    logger.info("Logged in as " + selfUser.getName() + "#" + selfUser.getDiscriminator());
+
     List<CommandData> commandData =
         commands.stream()
             .map(BaseCommand::getCommandData)
