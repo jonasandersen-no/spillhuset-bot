@@ -14,7 +14,7 @@ public record SpillhusetProperties(Discord discord, Openai openai) {
 
   }
 
-  public record Openai(@NotNull String token) {
+  public record Openai(@NotNull String token, @NotNull Long configurationId) {
 
   }
 }
