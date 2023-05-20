@@ -1,5 +1,6 @@
 package com.bjoggis.spillhuset.listener;
 
+import com.bjoggis.spillhuset.ActiveAiConfigurationException;
 import com.bjoggis.spillhuset.ChatService;
 import com.bjoggis.spillhuset.entity.ThreadChannel;
 import com.bjoggis.spillhuset.function.DeleteThreadFunction;
@@ -25,9 +26,49 @@ public class MessageListener extends ListenerAdapter {
   private final Logger logger = LoggerFactory.getLogger(MessageListener.class);
   private final ChatService chatService;
 
-  private final List<String> messages = List.of("Hei", "Hallo", "God dag", "God morgen",
-      "God kveld", "Heisann", "Hei der", "Hei på deg", "Heihei", "Heisveis", "Halla", "Hola",
-      "Tjena", "Yo", "Hei igjen");
+  private final List<String> messages = List.of(
+      "Hei",
+      "Hallo",
+      "God dag",
+      "God morgen",
+      "God kveld",
+      "Hi",
+      "Hello",
+      "Hey",
+      "Greetings",
+      "Howdy",
+      "Здравствуйте (Zdravstvuyte)",
+      "Привет (Privet)",
+      "Добрый день (Dobryy den')",
+      "Доброе утро (Dobroye utro)",
+      "Добрый вечер (Dobryy vecher)",
+      "Hola",
+      "Buenos días",
+      "Buenas tardes",
+      "Buenas noches",
+      "¿Qué tal?",
+      "Hallais",
+      "Heisann",
+      "Tjena",
+      "Sjekk deg",
+      "Morra",
+      "Aloha",
+      "Salutations",
+      "Sup",
+      "Bonjour",
+      "G'day",
+      "Здорово (Zdorovo)",
+      "Приветик (Privetik)",
+      "Здравствуй (Zdravstvuy)",
+      "День добрый (Den' dobryy)",
+      "Вечер добрый (Vecher dobryy)",
+      "¡Hola, qué haces!",
+      "¿Qué pasa?",
+      "¡Bien!",
+      "Cześć!",
+      "Witaj!",
+      "Dobry wieczór!",
+      "Dzień dobry!");
   private final ThreadChannelRepository threadChannelRepository;
   private final SaveMessageFunction saveMessageFunction;
   private final DeleteThreadFunction deleteThreadFunction;
@@ -98,6 +139,13 @@ public class MessageListener extends ListenerAdapter {
 
     } catch (IllegalStateException e) {
       //NOOP
+    } catch (ActiveAiConfigurationException e) {
+      logger.warn("Can't find active AI configuration");
+      if (event.getAuthor().isBot()) {
+        return; // Ignore bots
+      }
+      channel.sendMessage("Can't find active AI configuration. Please contact an admin!")
+          .queue();
     } catch (Exception e) {
       logger.error("Something went wrong", e);
       if (event.getAuthor().isBot()) {
