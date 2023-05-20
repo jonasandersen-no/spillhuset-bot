@@ -2,8 +2,8 @@ package com.bjoggis.spillhuset;
 
 import com.bjoggis.spillhuset.entity.AiConfiguration;
 import com.bjoggis.spillhuset.entity.Message;
+import com.bjoggis.spillhuset.function.ActiveAiConfigurationFunction;
 import com.bjoggis.spillhuset.properties.SpillhusetProperties;
-import com.bjoggis.spillhuset.repository.AiConfigurationRepository;
 import com.bjoggis.spillhuset.repository.MessageRepository;
 import com.theokanning.openai.completion.chat.ChatCompletionRequest;
 import com.theokanning.openai.completion.chat.ChatCompletionResult;
@@ -12,7 +12,6 @@ import com.theokanning.openai.service.OpenAiService;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,26 +26,20 @@ public class ChatService {
 
   private final SpillhusetProperties properties;
   private final MessageRepository messageRepository;
-  private final AiConfigurationRepository aiConfigurationRepository;
+
+  private final ActiveAiConfigurationFunction configurationFunction;
 
   public ChatService(SpillhusetProperties properties,
       MessageRepository messageRepository,
-      AiConfigurationRepository aiConfigurationRepository) {
+      ActiveAiConfigurationFunction configurationFunction) {
     this.properties = properties;
     this.messageRepository = messageRepository;
-    this.aiConfigurationRepository = aiConfigurationRepository;
+    this.configurationFunction = configurationFunction;
   }
 
   @Transactional
   public String chat(String message, String threadId) {
-    Optional<AiConfiguration> configurationOptional = aiConfigurationRepository.findById(
-        properties.openai().configurationId());
-
-    if (configurationOptional.isEmpty()) {
-      logger.warn("No configuration found, aborting");
-      return "No configuration found, please contact an administrator.";
-    }
-    AiConfiguration configuration = configurationOptional.get();
+    AiConfiguration configuration = configurationFunction.get();
 
     OpenAiService service = new OpenAiService(properties.openai().token(), Duration.ofMinutes(1));
 
@@ -65,6 +58,8 @@ public class ChatService {
       logger.warn("Too many messages, aborting");
       return "Too many messages, please try again with less than 10 messages.";
     }
+
+    logger.info("Using system message: " + configuration.getSystemMessage());
 
     List<ChatMessage> chatMessages = new ArrayList<>();
     chatMessages.add(new ChatMessage("system", configuration.getSystemMessage()));

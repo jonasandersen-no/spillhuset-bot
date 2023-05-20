@@ -1,5 +1,6 @@
 package com.bjoggis.spillhuset.listener;
 
+import com.bjoggis.spillhuset.ActiveAiConfigurationException;
 import com.bjoggis.spillhuset.ChatService;
 import com.bjoggis.spillhuset.entity.ThreadChannel;
 import com.bjoggis.spillhuset.function.DeleteThreadFunction;
@@ -98,6 +99,13 @@ public class MessageListener extends ListenerAdapter {
 
     } catch (IllegalStateException e) {
       //NOOP
+    } catch (ActiveAiConfigurationException e) {
+      logger.warn("Can't find active AI configuration");
+      if (event.getAuthor().isBot()) {
+        return; // Ignore bots
+      }
+      channel.sendMessage("Can't find active AI configuration. Please contact an admin!")
+          .queue();
     } catch (Exception e) {
       logger.error("Something went wrong", e);
       if (event.getAuthor().isBot()) {
