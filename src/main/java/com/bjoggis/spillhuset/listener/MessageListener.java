@@ -3,16 +3,13 @@ package com.bjoggis.spillhuset.listener;
 import com.bjoggis.spillhuset.ActiveAiConfigurationException;
 import com.bjoggis.spillhuset.ChatService;
 import com.bjoggis.spillhuset.entity.ThreadChannel;
-import com.bjoggis.spillhuset.function.DeleteThreadFunction;
 import com.bjoggis.spillhuset.function.SaveMessageFunction;
 import com.bjoggis.spillhuset.function.SaveMessageFunction.SaveMessageOptions;
 import com.bjoggis.spillhuset.repository.ThreadChannelRepository;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.channel.unions.MessageChannelUnion;
-import net.dv8tion.jda.api.events.channel.ChannelDeleteEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.slf4j.Logger;
@@ -71,31 +68,13 @@ public class MessageListener extends ListenerAdapter {
       "Dzień dobry!");
   private final ThreadChannelRepository threadChannelRepository;
   private final SaveMessageFunction saveMessageFunction;
-  private final DeleteThreadFunction deleteThreadFunction;
 
   public MessageListener(ChatService chatService,
       ThreadChannelRepository threadChannelRepository,
-      SaveMessageFunction saveMessageFunction,
-      DeleteThreadFunction deleteThreadFunction) {
+      SaveMessageFunction saveMessageFunction) {
     this.chatService = chatService;
     this.threadChannelRepository = threadChannelRepository;
     this.saveMessageFunction = saveMessageFunction;
-    this.deleteThreadFunction = deleteThreadFunction;
-  }
-
-  @Override
-  public void onChannelDelete(ChannelDeleteEvent event) {
-    try {
-      net.dv8tion.jda.api.entities.channel.concrete.ThreadChannel threadChannel = event.getChannel()
-          .asThreadChannel();
-
-      deleteThreadFunction.accept(
-          new DeleteThreadFunction.DeleteThreadOptions(threadChannel.getId()));
-
-    } catch (Exception e) {
-      //NOOP
-      logger.debug(e.getMessage());
-    }
   }
 
   @Override
@@ -115,15 +94,6 @@ public class MessageListener extends ListenerAdapter {
 
       if (threadOpt.isPresent()) {
         ThreadChannel threadChannel = threadOpt.get();
-
-        if (content.toLowerCase().startsWith("!close")) {
-          channel.sendMessage("Deleting thread in 5 seconds").queue();
-          channel.delete().queueAfter(5, TimeUnit.SECONDS, unused -> {
-            threadChannel1.getParentMessageChannel()
-                .deleteMessageById(threadChannel.getOriginalMessageId()).queue();
-          });
-          return;
-        }
 
         saveMessageFunction.accept(new SaveMessageOptions(message.getId(), message.getContentRaw(),
             event.getAuthor().isBot(), threadChannel));
