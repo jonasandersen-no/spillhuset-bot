@@ -67,13 +67,13 @@ public class ChatService {
     List<ChatMessage> oldMessages = new java.util.ArrayList<>(messages.stream().map(message2 -> {
       switch (message2.getSender()) {
         case USER -> {
-          return new ChatMessage("user", message2.getMessage());
+          return new ChatMessage("user", message2.getMessageAsString());
         }
         case SYSTEM -> {
-          return new ChatMessage("system", message2.getMessage());
+          return new ChatMessage("system", message2.getMessageAsString());
         }
         case ASSISTANT -> {
-          return new ChatMessage("assistant", message2.getMessage());
+          return new ChatMessage("assistant", message2.getMessageAsString());
         }
       }
       return null;
