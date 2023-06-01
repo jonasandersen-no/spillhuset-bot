@@ -24,7 +24,8 @@ public class Message {
   private Sender sender;
 
   @Lob
-  private String message;
+  @Column(columnDefinition = "blob")
+  private byte[] message;
 
   private LocalDateTime created;
 
@@ -56,12 +57,20 @@ public class Message {
     this.sender = sender;
   }
 
-  public String getMessage() {
+  public byte[] getMessage() {
     return message;
   }
 
-  public void setMessage(String message) {
+  public String getMessageAsString() {
+    return new String(message);
+  }
+
+  public void setMessage(byte[] message) {
     this.message = message;
+  }
+
+  public void setMessage(String message) {
+    this.message = message.getBytes();
   }
 
   public LocalDateTime getCreated() {
