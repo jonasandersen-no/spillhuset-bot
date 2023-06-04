@@ -90,4 +90,18 @@ public class AiConfiguration {
   public void setMaxMessages(Integer maxMessages) {
     this.maxMessages = maxMessages;
   }
+
+  @Override
+  public String toString() {
+    return "AiConfiguration{" +
+        "id=" + id +
+        ", systemMessage='" + systemMessage + '\'' +
+        ", temperature=" + temperature +
+        ", requestMaxTokens=" + requestMaxTokens +
+        ", responseMaxTokens=" + responseMaxTokens +
+        ", model='" + model + '\'' +
+        ", maxMessages=" + maxMessages +
+        ", numberOfMessages=" + numberOfMessages +
+        '}';
+  }
 }
