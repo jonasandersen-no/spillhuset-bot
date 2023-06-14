@@ -6,6 +6,8 @@ services:
     container_name: spillhuset-bot
     environment:
       - SPRING_PROFILES_ACTIVE=docker,prod
+    ports:
+      - '8400:8400'
     volumes:
       - 'utils:/utils'
     networks:
