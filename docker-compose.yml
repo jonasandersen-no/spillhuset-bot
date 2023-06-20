@@ -1,7 +1,7 @@
 version: '3.8'
 services:
   spillhuset-bot:
-    image: ghcr.io/notbjoggisatall/spillhuset-bot:1.9
+    image: ghcr.io/notbjoggisatall/spillhuset-bot:1.10
     restart: always
     container_name: spillhuset-bot
     environment:
