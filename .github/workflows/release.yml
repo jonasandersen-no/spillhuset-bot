@@ -73,9 +73,9 @@ jobs:
       - name: Find next snapshot version
         run: echo "NEXT_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)" >> $GITHUB_ENV
 
-      - name: Update docker-compose file
+      - name: Update manifests
         run: |
-          sed -i "s/image: ghcr.io\/notbjoggisatall\/spillhuset-bot:.*$/image: ghcr.io\/notbjoggisatall\/spillhuset-bot:${VERSION:1}/" docker-compose.yml
+          sed -i "s/image: ghcr.io\/notbjoggisatall\/spillhuset-bot:.*$/image: ghcr.io\/notbjoggisatall\/spillhuset-bot:${VERSION:1}/" manifests/app.yaml
         shell: bash
         env:
           VERSION: ${{ github.event.release.tag_name }}
