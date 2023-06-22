@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: spillhuset-bot-deployment
+  namespace: default
+  labels:
+    app: spillhuset-bot
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: spillhuset-bot
+  template:
+    metadata:
+      labels:
+        app: spillhuset-bot
+    spec:
+      containers:
+        - name: spillhuset-bot
+          image: ghcr.io/notbjoggisatall/spillhuset-bot:1.10-SNAPSHOT
+          imagePullPolicy: Always
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: prod
+          ports:
+            - containerPort: 8080
+      imagePullSecrets:
+        - name: credentials
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: spillhuset-bot-service
+spec:
+  selector:
+    app: spillhuset-bot
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8080
