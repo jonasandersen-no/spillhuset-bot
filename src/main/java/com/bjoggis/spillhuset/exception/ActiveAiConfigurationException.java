@@ -1,4 +1,4 @@
-package com.bjoggis.spillhuset;
+package com.bjoggis.spillhuset.exception;
 
 public class ActiveAiConfigurationException extends RuntimeException {
 

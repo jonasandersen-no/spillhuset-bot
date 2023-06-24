@@ -1,6 +1,6 @@
 package com.bjoggis.spillhuset.function;
 
-import com.bjoggis.spillhuset.ActiveAiConfigurationException;
+import com.bjoggis.spillhuset.exception.ActiveAiConfigurationException;
 import com.bjoggis.spillhuset.entity.AiConfiguration;
 import com.bjoggis.spillhuset.repository.ActiveAiConfigurationRepository;
 import java.util.function.Supplier;
