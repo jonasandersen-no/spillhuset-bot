@@ -48,6 +48,12 @@
     </dependency>
 
     <dependency>
+      <groupId>com.bjoggis.common</groupId>
+      <artifactId>common-discord</artifactId>
+      <version>1.1-SNAPSHOT</version>
+    </dependency>
+
+    <dependency>
       <groupId>net.dv8tion</groupId>
       <artifactId>JDA</artifactId>
       <version>5.0.0-beta.11</version>
