@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: spillhuset-bot
-          image: ghcr.io/notbjoggisatall/spillhuset-bot:1.12
+          image: ghcr.io/notbjoggisatall/spillhuset-bot:1.13
           imagePullPolicy: Always
           env:
             - name: SPRING_PROFILES_ACTIVE
