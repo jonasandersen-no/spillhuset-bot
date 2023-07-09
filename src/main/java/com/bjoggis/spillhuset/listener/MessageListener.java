@@ -1,7 +1,7 @@
 package com.bjoggis.spillhuset.listener;
 
-import com.bjoggis.spillhuset.ActiveAiConfigurationException;
-import com.bjoggis.spillhuset.ChatService;
+import com.bjoggis.spillhuset.exception.ActiveAiConfigurationException;
+import com.bjoggis.spillhuset.service.ChatService;
 import com.bjoggis.spillhuset.entity.ThreadChannel;
 import com.bjoggis.spillhuset.function.SaveMessageFunction;
 import com.bjoggis.spillhuset.function.SaveMessageFunction.SaveMessageOptions;

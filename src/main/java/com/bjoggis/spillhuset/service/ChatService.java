@@ -1,4 +1,4 @@
-package com.bjoggis.spillhuset;
+package com.bjoggis.spillhuset.service;
 
 import com.bjoggis.spillhuset.entity.AiConfiguration;
 import com.bjoggis.spillhuset.entity.Message;

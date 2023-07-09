@@ -1,5 +1,6 @@
 package com.bjoggis.spillhuset.command;
 
+import com.bjoggis.common.discord.command.BaseCommand;
 import com.bjoggis.spillhuset.function.DeleteThreadFunction;
 import com.bjoggis.spillhuset.function.DeleteThreadFunction.DeleteThreadOptions;
 import com.bjoggis.spillhuset.repository.ThreadChannelRepository;

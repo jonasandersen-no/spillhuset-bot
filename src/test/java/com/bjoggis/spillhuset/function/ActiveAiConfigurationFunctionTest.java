@@ -7,7 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.bjoggis.spillhuset.ActiveAiConfigurationException;
+import com.bjoggis.spillhuset.exception.ActiveAiConfigurationException;
 import com.bjoggis.spillhuset.entity.ActiveAiConfiguration;
 import com.bjoggis.spillhuset.entity.AiConfiguration;
 import com.bjoggis.spillhuset.repository.ActiveAiConfigurationRepository;

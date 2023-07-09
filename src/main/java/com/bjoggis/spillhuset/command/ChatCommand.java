@@ -1,5 +1,6 @@
 package com.bjoggis.spillhuset.command;
 
+import com.bjoggis.common.discord.command.BaseCommand;
 import com.bjoggis.spillhuset.entity.ThreadChannel;
 import com.bjoggis.spillhuset.repository.ThreadChannelRepository;
 import java.util.UUID;

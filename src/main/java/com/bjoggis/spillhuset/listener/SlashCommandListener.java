@@ -1,6 +1,6 @@
 package com.bjoggis.spillhuset.listener;
 
-import com.bjoggis.spillhuset.command.BaseCommand;
+import com.bjoggis.common.discord.command.BaseCommand;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
