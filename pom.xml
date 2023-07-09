@@ -9,7 +9,7 @@
   </parent>
   <groupId>com.bjoggis.spillhuset</groupId>
   <artifactId>spillhuset-bot</artifactId>
-  <version>1.12-SNAPSHOT</version>
+  <version>1.14-SNAPSHOT</version>
   <name>spillhuset-bot</name>
   <description>spillhuset-bot</description>
   <properties>
@@ -56,12 +56,12 @@
     <dependency>
       <groupId>net.dv8tion</groupId>
       <artifactId>JDA</artifactId>
-      <version>5.0.0-beta.11</version>
+      <version>5.0.0-beta.12</version>
     </dependency>
     <dependency>
       <groupId>com.theokanning.openai-gpt3-java</groupId>
       <artifactId>service</artifactId>
-      <version>0.13.0</version>
+      <version>0.14.0</version>
     </dependency>
     <dependency>
       <groupId>com.mysql</groupId>
