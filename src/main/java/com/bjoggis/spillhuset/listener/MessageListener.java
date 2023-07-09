@@ -8,6 +8,9 @@ import com.bjoggis.spillhuset.function.SaveMessageFunction.SaveMessageOptions;
 import com.bjoggis.spillhuset.repository.ThreadChannelRepository;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.channel.unions.MessageChannelUnion;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
@@ -99,10 +102,16 @@ public class MessageListener extends ListenerAdapter {
             event.getAuthor().isBot(), threadChannel));
 
         if (!event.getAuthor().isBot()) {
-          event.getChannel().sendTyping().queue(unused -> {
-            String response = chatService.chat(content, channel.getId());
-            channel.sendMessage(response).queue();
-          });
+          //Scheduler initialization
+          ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
+          scheduler.scheduleAtFixedRate(() -> {
+            logger.info("Sending typing");
+            event.getChannel().sendTyping().queue();
+          }, 0, 5, TimeUnit.SECONDS);
+
+          String response = chatService.chat(content, channel.getId(), event.getAuthor().getId());
+          scheduler.shutdown();
+          channel.sendMessage(response).queue();
         }
       }
 
