@@ -4,6 +4,7 @@ import com.bjoggis.spillhuset.entity.AiConfiguration;
 import com.bjoggis.spillhuset.entity.Message;
 import com.bjoggis.spillhuset.function.ActiveAiConfigurationFunction;
 import com.bjoggis.spillhuset.properties.SpillhusetProperties;
+import com.bjoggis.spillhuset.repository.AiConfigurationRepository;
 import com.bjoggis.spillhuset.repository.MessageRepository;
 import com.theokanning.openai.completion.chat.ChatCompletionRequest;
 import com.theokanning.openai.completion.chat.ChatCompletionResult;
@@ -31,13 +32,16 @@ public class ChatServiceImpl implements ChatService {
   private final MessageRepository messageRepository;
 
   private final ActiveAiConfigurationFunction configurationFunction;
+  private final AiConfigurationRepository aiConfigurationRepository;
 
   public ChatServiceImpl(SpillhusetProperties properties,
       MessageRepository messageRepository,
-      ActiveAiConfigurationFunction configurationFunction) {
+      ActiveAiConfigurationFunction configurationFunction,
+      AiConfigurationRepository aiConfigurationRepository) {
     this.properties = properties;
     this.messageRepository = messageRepository;
     this.configurationFunction = configurationFunction;
+    this.aiConfigurationRepository = aiConfigurationRepository;
   }
 
   @Override
@@ -88,22 +92,13 @@ public class ChatServiceImpl implements ChatService {
     chatMessages.forEach(chatMessage -> logger.info(chatMessage.getRole() + ": " + chatMessage
         .getContent()));
 
-    String hashedUserID = "unknown";
-    try {
-      MessageDigest digest = MessageDigest.getInstance("SHA-256");
-      byte[] hashedId = digest.digest((userId).getBytes(StandardCharsets.UTF_8));
-      hashedUserID = Base64.getEncoder().encodeToString(hashedId);
-    } catch (Exception ex) {
-      ex.printStackTrace();
-    }
-
     ChatCompletionRequest request = ChatCompletionRequest.builder()
         .model(configuration.getModel())
         .messages(chatMessages)
         .n(configuration.getNumberOfMessages())
         .maxTokens(configuration.getResponseMaxTokens())
         .temperature(configuration.getTemperature())
-        .user(hashedUserID)
+        .user(hashUserId(userId))
         .build();
 
     ChatCompletionResult response = service.createChatCompletion(request);
@@ -116,5 +111,51 @@ public class ChatServiceImpl implements ChatService {
     String content = response.getChoices().get(0).getMessage().getContent();
     logger.info("Response: " + content);
     return content;
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public String generateSingleMessage(String message, String userId, Long configurationId) {
+    AiConfiguration configuration = aiConfigurationRepository.findById(configurationId)
+        .orElse(configurationFunction.get());
+
+    OpenAiService service = new OpenAiService(properties.openai().token(), Duration.ofMinutes(1));
+    logger.info("Using system message: " + configuration.getSystemMessage());
+
+    List<ChatMessage> chatMessages = new ArrayList<>();
+    chatMessages.add(new ChatMessage("system", configuration.getSystemMessage()));
+    chatMessages.add(new ChatMessage("user", message));
+
+    ChatCompletionRequest request = ChatCompletionRequest.builder()
+        .model(configuration.getModel())
+        .messages(chatMessages)
+        .n(configuration.getNumberOfMessages())
+        .maxTokens(configuration.getResponseMaxTokens())
+        .temperature(configuration.getTemperature())
+        .user(hashUserId(userId))
+        .build();
+
+    ChatCompletionResult response = service.createChatCompletion(request);
+
+    logger.info("Message tokens: " + response.getUsage().getPromptTokens());
+
+    long completionTokens = response.getUsage().getCompletionTokens();
+
+    logger.info("Completion tokens used: " + completionTokens);
+    String content = response.getChoices().get(0).getMessage().getContent();
+    logger.info("Response: " + content);
+    return content;
+  }
+
+  private String hashUserId(String userId) {
+    String hashedUserID = "unknown";
+    try {
+      MessageDigest digest = MessageDigest.getInstance("SHA-256");
+      byte[] hashedId = digest.digest((userId).getBytes(StandardCharsets.UTF_8));
+      hashedUserID = Base64.getEncoder().encodeToString(hashedId);
+    } catch (Exception ex) {
+      ex.printStackTrace();
+    }
+    return hashedUserID;
   }
 }
