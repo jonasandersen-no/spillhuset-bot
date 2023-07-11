@@ -7,7 +7,7 @@ import org.springframework.validation.annotation.Validated;
 
 @ConfigurationProperties(prefix = "spillhuset")
 @Validated
-public record SpillhusetProperties(Discord discord, Openai openai) {
+public record SpillhusetProperties(Discord discord, Openai openai, Valorant valorant) {
 
 
   public record Discord(@NotNull String token, @NotNull Activity activity) {
@@ -15,6 +15,10 @@ public record SpillhusetProperties(Discord discord, Openai openai) {
   }
 
   public record Openai(@NotNull String token) {
+
+  }
+
+  public record Valorant(@NotNull String webhook) {
 
   }
 }
