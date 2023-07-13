@@ -2,7 +2,10 @@ package com.bjoggis.spillhuset.service;
 
 import com.bjoggis.spillhuset.entity.AiConfiguration;
 import com.bjoggis.spillhuset.entity.Message;
+import com.bjoggis.spillhuset.entity.ThreadChannel;
 import com.bjoggis.spillhuset.function.ActiveAiConfigurationFunction;
+import com.bjoggis.spillhuset.function.SaveMessageFunction;
+import com.bjoggis.spillhuset.function.SaveMessageFunction.SaveMessageOptions;
 import com.bjoggis.spillhuset.properties.SpillhusetProperties;
 import com.bjoggis.spillhuset.repository.AiConfigurationRepository;
 import com.bjoggis.spillhuset.repository.MessageRepository;
@@ -17,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -33,20 +37,23 @@ public class ChatServiceImpl implements ChatService {
 
   private final ActiveAiConfigurationFunction configurationFunction;
   private final AiConfigurationRepository aiConfigurationRepository;
+  private final SaveMessageFunction saveMessageFunction;
 
   public ChatServiceImpl(SpillhusetProperties properties,
       MessageRepository messageRepository,
       ActiveAiConfigurationFunction configurationFunction,
-      AiConfigurationRepository aiConfigurationRepository) {
+      AiConfigurationRepository aiConfigurationRepository,
+      SaveMessageFunction saveMessageFunction) {
     this.properties = properties;
     this.messageRepository = messageRepository;
     this.configurationFunction = configurationFunction;
     this.aiConfigurationRepository = aiConfigurationRepository;
+    this.saveMessageFunction = saveMessageFunction;
   }
 
   @Override
   @Transactional
-  public String chat(String message, String threadId, String userId) {
+  public String chat(String messageId, String message, ThreadChannel threadChannel, String userId) {
     AiConfiguration configuration = configurationFunction.get();
 
     OpenAiService service = new OpenAiService(properties.openai().token(), Duration.ofMinutes(1));
@@ -59,12 +66,14 @@ public class ChatServiceImpl implements ChatService {
       return "Message too long, please try again with less than 100 words.";
     }
 
+    saveMessageFunction.accept(new SaveMessageOptions(messageId, message, false, threadChannel));
+
     Set<Message> messages = messageRepository.findByThreadChannel_ThreadIdOrderByCreatedAsc(
-        threadId);
+        threadChannel.getThreadId());
 
     if (messages.size() > configuration.getMaxMessages()) {
       logger.warn("Too many messages, aborting");
-      return "Too many messages, please try again with less than 10 messages.";
+      return "Too many messages, please start a new thread.";
     }
 
     logger.info("Using system message: " + configuration.getSystemMessage());
@@ -109,6 +118,8 @@ public class ChatServiceImpl implements ChatService {
 
     logger.info("Completion tokens used: " + completionTokens);
     String content = response.getChoices().get(0).getMessage().getContent();
+
+    saveMessageFunction.accept(new SaveMessageOptions(UUID.randomUUID().toString(), content, true, threadChannel));
     logger.info("Response: " + content);
     return content;
   }

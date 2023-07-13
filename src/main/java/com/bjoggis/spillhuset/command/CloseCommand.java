@@ -36,8 +36,8 @@ public class CloseCommand extends BaseCommand {
           threadChannelRepository.findByThreadId(threadChannel.getId());
 
       if (entity.isEmpty()) {
-        event.getHook().sendMessage("This thread is not a chat thread.")
-            .setEphemeral(true).queue();
+        event.getHook().sendMessage("This is not a thread created by the chat command.")
+            .queue();
         return;
       }
       logger.info("Deleting thread {}", threadChannel.getId());
@@ -52,8 +52,8 @@ public class CloseCommand extends BaseCommand {
         deleteThreadFunction.accept(option);
       });
     } else {
-      event.getHook().sendMessage("This thread is not a chat thread.")
-          .setEphemeral(true).queue();
+      event.getHook().sendMessage("This is not a thread.")
+          .queue();
     }
   }
 }
