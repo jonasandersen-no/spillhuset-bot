@@ -1,13 +1,12 @@
 package com.bjoggis.spillhuset.listener;
 
-import com.bjoggis.spillhuset.exception.ActiveAiConfigurationException;
-import com.bjoggis.spillhuset.service.ChatService;
 import com.bjoggis.spillhuset.entity.ThreadChannel;
-import com.bjoggis.spillhuset.function.SaveMessageFunction;
-import com.bjoggis.spillhuset.function.SaveMessageFunction.SaveMessageOptions;
+import com.bjoggis.spillhuset.exception.ActiveAiConfigurationException;
 import com.bjoggis.spillhuset.repository.ThreadChannelRepository;
+import com.bjoggis.spillhuset.service.ChatService;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -70,21 +69,20 @@ public class MessageListener extends ListenerAdapter {
       "Dobry wieczór!",
       "Dzień dobry!");
   private final ThreadChannelRepository threadChannelRepository;
-  private final SaveMessageFunction saveMessageFunction;
 
   public MessageListener(ChatService chatService,
-      ThreadChannelRepository threadChannelRepository,
-      SaveMessageFunction saveMessageFunction) {
+      ThreadChannelRepository threadChannelRepository) {
     this.chatService = chatService;
     this.threadChannelRepository = threadChannelRepository;
-    this.saveMessageFunction = saveMessageFunction;
   }
 
   @Override
   @Transactional
   public void onMessageReceived(MessageReceivedEvent event) {
 
-    // Get random message from messages array
+    if (event.getAuthor().isBot()) {
+      return; // Ignore bots
+    }
 
     Message message = event.getMessage();
     String content = message.getContentRaw();
@@ -98,23 +96,27 @@ public class MessageListener extends ListenerAdapter {
       if (threadOpt.isPresent()) {
         ThreadChannel threadChannel = threadOpt.get();
 
-        saveMessageFunction.accept(new SaveMessageOptions(message.getId(), message.getContentRaw(),
-            event.getAuthor().isBot(), threadChannel));
+        //Scheduler initialization
+        ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
+        scheduler.scheduleAtFixedRate(() -> {
+          logger.info("Sending typing");
+          event.getChannel().sendTyping().queue();
+        }, 0, 5, TimeUnit.SECONDS);
 
-        if (!event.getAuthor().isBot()) {
-          //Scheduler initialization
-          ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
-          scheduler.scheduleAtFixedRate(() -> {
-            logger.info("Sending typing");
-            event.getChannel().sendTyping().queue();
-          }, 0, 5, TimeUnit.SECONDS);
+        CompletableFuture.supplyAsync(
+                () -> chatService.chat(message.getId(), content, threadChannel,
+                    event.getAuthor().getId()))
+            .whenComplete((result, throwable) -> {
+              scheduler.shutdown();
+              channel.sendMessage(result).queue();
 
-          String response = chatService.chat(content, channel.getId(), event.getAuthor().getId());
-          scheduler.shutdown();
-          channel.sendMessage(response).queue();
-        }
+              if (throwable != null) {
+                logger.error("Something went wrong", throwable);
+                channel.sendMessage("Something went wrong, please try again!")
+                    .queue();
+              }
+            });
       }
-
 
     } catch (IllegalStateException e) {
       //NOOP
@@ -141,14 +143,7 @@ public class MessageListener extends ListenerAdapter {
     if (content.toLowerCase().startsWith("hei")) {
       String randomMessage = messages.get((int) (Math.random() * messages.size()));
       logger.info("Responding with: " + randomMessage);
-      channel.sendMessage(randomMessage)
-          .queue();
-//    } else if (content.startsWith("!chat ")) {
-//      String chatMessage = content.substring(6);
-//      String response = chatService.chat(chatMessage, channel.getId());
-//      channel.sendMessage(response)
-//          .queue();
-//    }
+      channel.sendMessage(randomMessage).queue();
     }
   }
 }

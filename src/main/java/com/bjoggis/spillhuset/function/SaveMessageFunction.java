@@ -1,5 +1,6 @@
 package com.bjoggis.spillhuset.function;
 
+import com.bjoggis.spillhuset.entity.Message;
 import com.bjoggis.spillhuset.entity.ThreadChannel;
 import com.bjoggis.spillhuset.function.SaveMessageFunction.SaveMessageOptions;
 import com.bjoggis.spillhuset.repository.MessageRepository;
@@ -20,7 +21,7 @@ public class SaveMessageFunction implements Consumer<SaveMessageOptions> {
   @Override
   public void accept(SaveMessageOptions options) {
 
-    com.bjoggis.spillhuset.entity.Message entityMessage = new com.bjoggis.spillhuset.entity.Message();
+    Message entityMessage = new Message();
     entityMessage.setMessageId(options.messageId());
     entityMessage.setMessage(options.message());
     entityMessage.setCreated(LocalDateTime.now());
