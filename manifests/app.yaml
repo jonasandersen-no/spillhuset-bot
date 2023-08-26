@@ -48,3 +48,22 @@ spec:
     - protocol: TCP
       port: 80
       targetPort: 8080
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: openai-ingress
+  annotations:
+    kubernetes.io/ingress.class: nginx
+spec:
+  rules:
+    - host: spillhuset-api.bjoggis.com
+      http:
+        paths:
+          - pathType: Prefix
+            path: "/"
+            backend:
+              service:
+                name: spillhuset-bot-service
+                port:
+                  number: 80
