@@ -1,0 +1,13 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="SpillhusetBotApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
+    <option name="ACTIVE_PROFILES" value="dev" />
+    <module name="spillhuset-bot" />
+    <selectedOptions>
+      <option name="environmentVariables" />
+    </selectedOptions>
+    <option name="SPRING_BOOT_MAIN_CLASS" value="com.bjoggis.spillhuset.SpillhusetBotApplication" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>
