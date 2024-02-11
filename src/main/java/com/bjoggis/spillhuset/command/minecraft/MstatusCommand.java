@@ -46,6 +46,7 @@ public class MstatusCommand extends BaseCommand {
       LinodeInstance instance = instances[0];
       event.getHook().sendMessage("""
               **Server info**
+              Hostname: **minecraft.jonasandersen.no**
               Label: %s
               IP: %s
               Status: %s

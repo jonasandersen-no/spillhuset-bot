@@ -2,6 +2,7 @@ package com.bjoggis.spillhuset.command.minecraft;
 
 import com.bjoggis.common.discord.command.BaseCommand;
 import com.bjoggis.spillhuset.Running;
+import com.bjoggis.spillhuset.minecraft.CloudflareApi;
 import com.bjoggis.spillhuset.minecraft.configuration.LinodeRestTemplate;
 import com.bjoggis.spillhuset.minecraft.domain.ConnectionInfo;
 import com.bjoggis.spillhuset.minecraft.domain.Ip;
@@ -16,11 +17,14 @@ public class Mstartcommand extends BaseCommand {
 
   private final LinodeRestTemplate linodeRestTemplate;
   private final Running running;
+  private final CloudflareApi cloudflareApi;
 
-  public Mstartcommand(LinodeRestTemplate linodeRestTemplate, Running running) {
+  public Mstartcommand(LinodeRestTemplate linodeRestTemplate, Running running,
+      CloudflareApi cloudflareApi) {
     super("Starts a minecraft server");
     this.linodeRestTemplate = linodeRestTemplate;
     this.running = running;
+    this.cloudflareApi = cloudflareApi;
   }
 
   @Override
@@ -32,6 +36,8 @@ public class Mstartcommand extends BaseCommand {
 
     ConnectionInfo connectionInfo = new ConnectionInfo(createResponse.id(),
         Ip.from(createResponse.ip()));
+
+    cloudflareApi.overwriteDnsRecord(Ip.from(createResponse.ip()));
 
     running.run(connectionInfo, event.getHook(), "classpath:start.txt", Duration.ofMinutes(3));
   }
@@ -54,7 +60,7 @@ public class Mstartcommand extends BaseCommand {
         .postForEntity("/instance/create",
             new CreateRequest(event.getUser().getEffectiveName()), CreateResponse.class);
     String result = """
-        Creating server with IP %s.
+        Creating server with IP %s (minecraft.jonasandersen.no).
         It will take about 5 minutes before its up and running!
                 
         I will respond when its ready.

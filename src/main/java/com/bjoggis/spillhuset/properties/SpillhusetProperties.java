@@ -10,7 +10,7 @@ import org.springframework.validation.annotation.Validated;
 @ConfigurationProperties(prefix = "spillhuset")
 @Validated
 public record SpillhusetProperties(Discord discord, Openai openai, Valorant valorant,
-                                   Minecraft minecraft) {
+                                   Minecraft minecraft, Cloudflare cloudflare) {
 
 
   public record Discord(@NotNull String token, @NotNull Activity activity) {
@@ -28,6 +28,12 @@ public record SpillhusetProperties(Discord discord, Openai openai, Valorant valo
   @Valid
   public record Minecraft(@NotNull String username, @NotNull String password,
                           @NotNull @DefaultValue("22") Integer port) {
+
+  }
+
+  @Valid
+  public record Cloudflare(@NotNull String apiKey, @NotNull String zoneId,
+                           @NotNull String dnsRecordId) {
 
   }
 }
