@@ -9,7 +9,7 @@
   </parent>
   <groupId>com.bjoggis.spillhuset</groupId>
   <artifactId>spillhuset-bot</artifactId>
-  <version>1.18-SNAPSHOT</version>
+  <version>1.19-SNAPSHOT</version>
   <name>spillhuset-bot</name>
   <description>spillhuset-bot</description>
   <properties>
