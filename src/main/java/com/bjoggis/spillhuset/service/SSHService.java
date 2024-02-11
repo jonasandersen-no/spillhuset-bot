@@ -1,19 +1,22 @@
 package com.bjoggis.spillhuset.service;
 
-import com.bjoggis.spillhuset.command.minecraft.Mstartcommand.CreateLResponse;
 import com.bjoggis.spillhuset.minecraft.configuration.LinodeRestTemplate;
+import com.bjoggis.spillhuset.minecraft.domain.ConnectionInfo;
 import com.bjoggis.spillhuset.minecraft.domain.ConsoleCommand;
 import com.bjoggis.spillhuset.properties.SpillhusetProperties.Minecraft;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.Properties;
-import net.dv8tion.jda.api.interactions.InteractionHook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.util.ResourceUtils;
 
 public class SSHService {
 
@@ -22,22 +25,20 @@ public class SSHService {
   private final Session session;
 
   private final LinodeRestTemplate restTemplate;
-  private final InteractionHook hook;
 
-  private final CreateLResponse createResponse;
+  private final ConnectionInfo connectionInfo;
 
-  public SSHService(LinodeRestTemplate restTemplate, CreateLResponse createResponse, InteractionHook hook,
+  public SSHService(LinodeRestTemplate restTemplate, ConnectionInfo connectionInfo,
       Minecraft minecraft)
       throws JSchException {
     this.restTemplate = restTemplate;
-    this.createResponse = createResponse;
-    this.hook = hook;
+    this.connectionInfo = connectionInfo;
 
     JSch jsch = new JSch();
-    session = jsch.getSession(minecraft.username(), createResponse.ip(), 22);
+    session = jsch.getSession(minecraft.username(), connectionInfo.ip().value(), 22);
     session.setPassword(minecraft.password());
 
-    logger.info("Session created for ip {}", createResponse.ip());
+    logger.info("Session created for ip {}", connectionInfo.ip());
 
     // Avoid asking for key confirmation
     Properties config = new Properties();
@@ -45,41 +46,36 @@ public class SSHService {
     session.setConfig(config);
   }
 
-  public void setupMinecraft() throws JSchException, IOException, InterruptedException {
+  public void setupMinecraft(String commandsFile)
+      throws JSchException, IOException, InterruptedException {
     if (session == null) {
       throw new IllegalStateException("Session is not set up");
     }
 
-    attachVolume(createResponse.id());
+    attachVolume(connectionInfo.id());
 
     logger.info("Sleeping for 20 seconds to wait for volume to attach");
     Thread.sleep(Duration.ofSeconds(20).toMillis());
 
+    runShellCommands(commandsFile);
+
+
+  }
+
+  @Async
+  public void runShellCommands(String commandsFile) throws IOException, JSchException {
     session.connect();
 
-    logger.info("Result: {}",
-        new ConsoleCommand("curl -fsSL https://get.docker.com -o get-docker.sh").execute(session));
+    BufferedReader bufferedReader = new BufferedReader(
+        new FileReader(ResourceUtils.getFile(commandsFile)));
 
-    logger.info("Result: {}", new ConsoleCommand("sudo sh ./get-docker.sh").execute(session));
+    while (bufferedReader.ready()) {
+      String command = bufferedReader.readLine();
+      String result = new ConsoleCommand(command).execute(session);
+      logger.info("Result: {}", result);
+    }
 
-    logger.info("Result: {}", new ConsoleCommand(
-        "curl -fsSL https://raw.githubusercontent.com/NotBjoggisAtAll/minecraft-compose/main/docker-compose.yml -o docker-compose.yml").execute(
-        session));
-
-    logger.info("Result: {}",
-        new ConsoleCommand("mkdir \"/mnt/minecraft-volume-01\"").execute(session));
-
-    logger.info("Result: {}", new ConsoleCommand(
-        "mount \"/dev/disk/by-id/scsi-0Linode_Volume_minecraft-volume-01\" \"/mnt/minecraft-volume-01\"").execute(
-        session));
-
-    logger.info("Result: {}", new ConsoleCommand("docker compose up -d").execute(session));
-
-    logger.info("Done setting up server");
-
-    Thread.sleep(Duration.ofSeconds(5).toMillis());
-    hook.sendMessage("Server should now be ready!").queue();
-
+    bufferedReader.close();
     session.disconnect();
   }
 

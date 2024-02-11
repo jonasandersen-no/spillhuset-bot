@@ -1,7 +1,7 @@
 package com.bjoggis.spillhuset;
 
-import com.bjoggis.spillhuset.command.minecraft.Mstartcommand.CreateLResponse;
 import com.bjoggis.spillhuset.minecraft.configuration.LinodeRestTemplate;
+import com.bjoggis.spillhuset.minecraft.domain.ConnectionInfo;
 import com.bjoggis.spillhuset.properties.SpillhusetProperties;
 import com.bjoggis.spillhuset.service.SSHService;
 import com.jcraft.jsch.JSchException;
@@ -22,8 +22,6 @@ public class Running {
   private final LinodeRestTemplate linodeRestTemplate;
   private final SpillhusetProperties properties;
 
-  private final Duration duration = Duration.ofMinutes(3);
-
   public Running(LinodeRestTemplate linodeRestTemplate, SpillhusetProperties properties) {
     this.linodeRestTemplate = linodeRestTemplate;
     this.properties = properties;
@@ -31,8 +29,8 @@ public class Running {
 
 
   @Async
-  public void run(CreateLResponse createResponse, InteractionHook hook) {
-
+  public void run(ConnectionInfo connectionInfo, InteractionHook hook, String commands,
+      Duration duration) {
     if (isConnected) {
       hook.sendMessage("Someone else is already creating a server").queue();
       return;
@@ -42,10 +40,12 @@ public class Running {
       try {
         logger.info("Waiting for server to be ready. Trying in {} ", duration.toString());
         Thread.sleep(duration.toMillis());
-        SSHService sshService = new SSHService(linodeRestTemplate, createResponse, hook, properties.minecraft());
+        SSHService sshService = new SSHService(linodeRestTemplate, connectionInfo,
+            properties.minecraft());
         logger.info("Connecting to server");
-        sshService.setupMinecraft();
+        sshService.setupMinecraft(commands);
         isConnected = true;
+        hook.sendMessage("Server should now be ready!").queue();
       } catch (JSchException | IOException | InterruptedException e) {
         logger.error("Failed to connect to server", e);
       }

@@ -3,9 +3,11 @@ package com.bjoggis.spillhuset.command.minecraft;
 import com.bjoggis.common.discord.command.BaseCommand;
 import com.bjoggis.spillhuset.Running;
 import com.bjoggis.spillhuset.minecraft.configuration.LinodeRestTemplate;
+import com.bjoggis.spillhuset.minecraft.domain.ConnectionInfo;
+import com.bjoggis.spillhuset.minecraft.domain.Ip;
 import com.bjoggis.spillhuset.minecraft.domain.LinodeInstance;
+import java.time.Duration;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
-import org.jilt.Builder;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
@@ -23,15 +25,18 @@ public class Mstartcommand extends BaseCommand {
 
   @Override
   public void onSlashCommand(SlashCommandInteractionEvent event) {
-    CreateLResponse createLResponse = create(event);
-    if (createLResponse == null) {
+    CreateResponse createResponse = create(event);
+    if (createResponse == null) {
       return;
     }
-    running.run(createLResponse, event.getHook());
 
+    ConnectionInfo connectionInfo = new ConnectionInfo(createResponse.id(),
+        Ip.from(createResponse.ip()));
+
+    running.run(connectionInfo, event.getHook(), "classpath:start.txt", Duration.ofMinutes(3));
   }
 
-  public CreateLResponse create(SlashCommandInteractionEvent event) {
+  public CreateResponse create(SlashCommandInteractionEvent event) {
 
     record CreateRequest(String createdBy) {
 
@@ -45,9 +50,9 @@ public class Mstartcommand extends BaseCommand {
       return null;
     }
 
-    ResponseEntity<CreateLResponse> response = linodeRestTemplate.get()
+    ResponseEntity<CreateResponse> response = linodeRestTemplate.get()
         .postForEntity("/instance/create",
-            new CreateRequest(event.getUser().getEffectiveName()), CreateLResponse.class);
+            new CreateRequest(event.getUser().getEffectiveName()), CreateResponse.class);
     String result = """
         Creating server with IP %s.
         It will take about 5 minutes before its up and running!
@@ -61,8 +66,7 @@ public class Mstartcommand extends BaseCommand {
 
   }
 
-  @Builder
-  public record CreateLResponse(Long id, String createdBy, String label, String ip) {
+  public record CreateResponse(Long id, String createdBy, String label, String ip) {
 
   }
 }
