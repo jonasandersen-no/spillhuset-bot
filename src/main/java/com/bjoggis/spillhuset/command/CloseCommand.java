@@ -4,7 +4,6 @@ import com.bjoggis.common.discord.command.BaseCommand;
 import com.bjoggis.spillhuset.function.DeleteThreadFunction;
 import com.bjoggis.spillhuset.function.DeleteThreadFunction.DeleteThreadOptions;
 import com.bjoggis.spillhuset.repository.ThreadChannelRepository;
-import jakarta.validation.constraints.NotNull;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import net.dv8tion.jda.api.entities.channel.concrete.ThreadChannel;
@@ -30,7 +29,7 @@ public class CloseCommand extends BaseCommand {
   }
 
   @Override
-  public void onSlashCommand(@NotNull SlashCommandInteractionEvent event) {
+  public void onSlashCommand(SlashCommandInteractionEvent event) {
     if (event.getChannel() instanceof ThreadChannel threadChannel) {
       final Optional<com.bjoggis.spillhuset.entity.ThreadChannel> entity =
           threadChannelRepository.findByThreadId(threadChannel.getId());
