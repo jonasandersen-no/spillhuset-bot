@@ -2,8 +2,8 @@ name: Build latest master and deploy
 
 on:
   push:
-    branches:
-      - master
+    tags:
+      - v*
 
 jobs:
   build:
@@ -16,7 +16,7 @@ jobs:
       packages: write
     steps:
       - name: Setup Maven Action
-        uses: s4u/setup-maven-action@v1.12.0
+        uses: s4u/setup-maven-action@v1.11.0
         with:
           java-version: 17
           java-distribution: liberica
@@ -43,7 +43,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       - name: create-manifest
         run: |
-          docker manifest create bjoggis/spillhuset-bot:v0.0.0 --amend bjoggis/spillhuset-bot:v0.0.0-x86_64
-          docker manifest push bjoggis/spillhuset-bot:v0.0.0
-          docker manifest create bjoggis/spillhuset-bot:latest --amend bjoggis/spillhuset-bot:v0.0.0-x86_64
+          docker manifest create bjoggis/spillhuset-bot:${{ github.ref_name }} --amend bjoggis/spillhuset-bot:${{ github.ref_name }}-x86_64
+          docker manifest push bjoggis/spillhuset-bot:${{ github.ref_name }}
+          docker manifest create bjoggis/spillhuset-bot:latest --amend bjoggis/spillhuset-bot:${{ github.ref_name }}-x86_64
           docker manifest push bjoggis/spillhuset-bot:latest
