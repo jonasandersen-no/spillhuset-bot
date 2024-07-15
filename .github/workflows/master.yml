@@ -9,7 +9,7 @@ jobs:
   build:
     strategy:
       matrix:
-        os: [ ubuntu-latest ]
+        os: [ ubuntu-latest, self-hosted ]
     runs-on: ${{ matrix.os }}
     permissions:
       contents: read
@@ -54,7 +54,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       - name: create-manifest
         run: |
-          docker manifest create bjoggis/spillhuset-bot:v0.0.0 --amend bjoggis/spillhuset-bot:v0.0.0-x86_64
+          docker manifest create bjoggis/spillhuset-bot:v0.0.0 --amend bjoggis/spillhuset-bot:v0.0.0-x86_64 --amend bjoggis/spillhuset-bot:v0.0.0-aarch_64
           docker manifest push bjoggis/spillhuset-bot:v0.0.0
-          docker manifest create bjoggis/spillhuset-bot:latest --amend bjoggis/spillhuset-bot:v0.0.0-x86_64
+          docker manifest create bjoggis/spillhuset-bot:latest --amend bjoggis/spillhuset-bot:v0.0.0-x86_64 --amend bjoggis/spillhuset-bot:v0.0.0-aarch_64
           docker manifest push bjoggis/spillhuset-bot:latest

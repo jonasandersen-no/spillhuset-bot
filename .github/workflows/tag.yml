@@ -1,4 +1,4 @@
-name: Build latest master and deploy
+name: Build tag
 
 on:
   push:
@@ -9,14 +9,14 @@ jobs:
   build:
     strategy:
       matrix:
-        os: [ ubuntu-latest ]
+        os: [ ubuntu-latest, self-hosted ]
     runs-on: ${{ matrix.os }}
     permissions:
       contents: read
       packages: write
     steps:
       - name: Setup Maven Action
-        uses: s4u/setup-maven-action@v1.11.0
+        uses: s4u/setup-maven-action@v1.12.0
         with:
           java-version: 17
           java-distribution: liberica
@@ -54,7 +54,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       - name: create-manifest
         run: |
-          docker manifest create bjoggis/spillhuset-bot:${{ github.ref_name }} --amend bjoggis/spillhuset-bot:${{ github.ref_name }}-x86_64
+          docker manifest create bjoggis/spillhuset-bot:${{ github.ref_name }} --amend bjoggis/spillhuset-bot:${{ github.ref_name }}-x86_64 --amend bjoggis/spillhuset-bot:${{ github.ref_name }}-aarch_64
           docker manifest push bjoggis/spillhuset-bot:${{ github.ref_name }}
-          docker manifest create bjoggis/spillhuset-bot:latest --amend bjoggis/spillhuset-bot:${{ github.ref_name }}-x86_64
+          docker manifest create bjoggis/spillhuset-bot:latest --amend bjoggis/spillhuset-bot:${{ github.ref_name }}-x86_64 --amend bjoggis/spillhuset-bot:${{ github.ref_name }}-aarch_64
           docker manifest push bjoggis/spillhuset-bot:latest
